@@ -8,7 +8,7 @@ This entire application is bundled into a **single `index.html` file**, making i
 
 ## 🚀 Live Demo
 
-➡ [Visit the Live Demo](https://samarthlagare.github.io/moviescore/)  
+➡ [Visit the Live Demo](https://samarthlagare.github.io/moviesscore/)  
 
 ---
 
