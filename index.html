@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MovieScore | Find Your Next Binge</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS embedded within the HTML -->
+    <style>
+        :root {
+            --background-dark: #000000;
+            --primary-dark: #1a1a1a;
+            --primary-light: #2c2c2c;
+            --accent-color: #EA580C; /* Orange-600 */
+            --text-primary: #FFEDD5;  /* Orange-100 */
+            --text-secondary: #FDBA74;/* Orange-300 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        @keyframes move-stars {
+            from { transform: translateY(0px); }
+            to   { transform: translateY(-2000px); }
+        }
+
+        #star-field {
+            position: fixed;
+            width: 100%;
+            height: 200%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .stars, .stars2, .stars3 {
+            position: absolute;
+            background: transparent;
+        }
+        .stars { width: 1px; height: 1px; box-shadow: 698px 1604px #FFF, 143px 126px #FFF, 73px 1836px #FFF, 1782px 1483px #FFF, 1638px 148px #FFF, 1248px 156px #FFF, 1373px 1056px #FFF, 1956px 1475px #FFF, 96px 1481px #FFF, 936px 95px #FFF, 1334px 114px #FFF, 755px 1238px #FFF, 357px 143px #FFF, 1918px 1284px #FFF, 584px 1276px #FFF, 420px 1403px #FFF, 1445px 1668px #FFF, 1530px 1000px #FFF, 122px 1319px #FFF, 1149px 1205px #FFF, 513px 1869px #FFF, 1070px 1198px #FFF, 135px 231px #FFF, 1339px 1303px #FFF, 627px 1914px #FFF, 1739px 731px #FFF, 1591px 1129px #FFF, 1329px 1338px #FFF, 884px 387px #FFF, 1878px 114px #FFF, 1209px 1089px #FFF; animation: move-stars 150s linear infinite; }
+        .stars2 { width: 2px; height: 2px; box-shadow: 1726px 1934px #FFF, 1391px 1646px #FFF, 491px 1281px #FFF, 1007px 113px #FFF, 1590px 1162px #FFF, 873px 1812px #FFF, 1424px 1739px #FFF, 447px 155px #FFF, 1303px 621px #FFF, 1504px 921px #FFF, 153px 439px #FFF, 1422px 791px #FFF, 1830px 1313px #FFF, 1482px 58px #FFF, 1100px 117px #FFF, 49px 172px #FFF, 380px 1232px #FFF, 1572px 1899px #FFF, 1795px 1083px #FFF, 1178px 1039px #FFF; animation: move-stars 100s linear infinite; }
+        .stars3 { width: 3px; height: 3px; box-shadow: 1528px 1133px #FFF, 1690px 586px #FFF, 1269px 1292px #FFF, 1884px 1002px #FFF, 1573px 1093px #FFF, 105px 446px #FFF, 1036px 129px #FFF, 419px 1505px #FFF, 461px 1392px #FFF, 142px 1394px #FFF; animation: move-stars 50s linear infinite; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--primary-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+        @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .content-card { opacity: 0; }
+        
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+        }
+        .animated-gradient-text {
+            background: linear-gradient(90deg, #F97316, #F59E0B, #FBBF24, #F97316);
+            background-size: 200% 200%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s ease infinite;
+        }
+        
+        #search { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        #search:hover, #search:focus {
+             box-shadow: 0 0 20px rgba(234, 88, 12, 0.4); transform: scale(1.02);
+        }
+
+        .content-card {
+            background-color: var(--primary-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--primary-light);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: scale(1.08) translateY(-10px);
+            box-shadow: 0 0 25px -5px rgba(234, 88, 12, 0.4), 0 10px 20px -10px rgba(234, 88, 12, 0.2);
+            z-index: 10;
+        }
+       
+        .info-popup {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 50%, rgba(0,0,0,0) 100%);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .content-card:hover .info-popup { opacity: 1; }
+        
+        .info-popup .watchability-hover-score, .info-popup .title, .info-popup .controls {
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .content-card:hover .info-popup .watchability-hover-score { transition-delay: 0.1s; transform: translateY(0); }
+        .content-card:hover .info-popup .title { transition-delay: 0.2s; transform: translateY(0); }
+        .content-card:hover .info-popup .controls { transition-delay: 0.3s; transform: translateY(0); }
+
+        .filter-btn {
+            transition: all 0.2s ease; border-bottom: 2px solid transparent; padding-bottom: 4px;
+        }
+        .filter-btn.active {
+            border-bottom-color: var(--accent-color); color: var(--accent-color);
+        }
+
+        .modal {
+             transition: opacity 0.3s ease;
+             backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            transition: transform 0.3s ease;
+            background: radial-gradient(circle at top right, rgba(234, 88, 12, 0.1), transparent 40%), 
+                        radial-gradient(circle at bottom left, rgba(234, 88, 12, 0.1), transparent 50%),
+                        var(--primary-dark);
+            border: 1px solid var(--primary-light);
+        }
+        
+        .toast {
+            animation: toast-in 0.5s, toast-out 0.5s 2.5s; transform: translateX(120%);
+        }
+        @keyframes toast-in { from {transform: translateX(120%);} to {transform: translateX(0);}}
+        @keyframes toast-out { from {transform: translateX(0);} to {transform: translateX(120%);}}
+
+        .watchability-score-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .watchability-score-container svg {
+            transform: rotate(-90deg);
+        }
+        .watchability-score-bg {
+            fill: none;
+            stroke: var(--primary-light);
+            stroke-width: 8;
+        }
+        .watchability-score-progress {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease-out, stroke 0.5s;
+        }
+        .watchability-score-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* "Watched" Styles */
+        .watched-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .watched-overlay svg {
+            width: 50%;
+            height: 50%;
+            color: #22c55e; /* green-500 */
+        }
+        .watched-indicator {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: #22c55e;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--primary-dark);
+        }
+        
+        /* NEW Glow Cursor Styles */
+        #glow-cursor {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s;
+            z-index: 9999;
+            display: none;
+        }
+        body.glow-effect-active {
+            cursor: none;
+        }
+        body.glow-effect-active #glow-cursor {
+            display: block;
+        }
+        body.glow-effect-active::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(
+                600px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+                rgba(234, 88, 12, 0.15),
+                transparent 80%
+            );
+            z-index: -2;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+    </style>
+</head>
+<body class="bg-black text-orange-100 antialiased">
+    <div id="glow-cursor"></div>
+    <div id="star-field"><div class="stars"></div><div class="stars2"></div><div class="stars3"></div></div>
+
+    <header class="bg-black/50 backdrop-blur-sm shadow-lg sticky top-0 z-50 py-4 px-6 md:px-12">
+        <div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
+            <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-orange-500 tracking-wider flex-shrink-0 cursor-pointer transition-colors duration-300">MovieScore</h1>
+            <div id="media-filters" class="flex items-center gap-4 md:gap-6 order-3 sm:order-2 w-full sm:w-auto justify-center">
+                <button class="filter-btn active" data-type="movie">Movies</button>
+                <button class="filter-btn" data-type="tv">TV Shows</button>
+                <button class="filter-btn" data-type="anime">Anime</button>
+            </div>
+            <div class="flex items-center gap-4 order-2 sm:order-3">
+                 <button id="search-toggle-btn" class="md:hidden p-2 rounded-full hover:bg-primary-light transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+                 <!-- NEW Glow Toggle Button -->
+                <button id="glow-toggle-btn" class="p-2 rounded-full hover:bg-primary-light transition-colors" title="Toggle Glow Effect">
+                    <svg id="glow-icon-on" class="w-6 h-6 hidden text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 10.607a1 1 0 011.414-1.414l.707.707a1 1 0 11-1.414 1.414l-.707-.707zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clip-rule="evenodd"></path></svg>
+                    <svg id="glow-icon-off" class="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                </button>
+                <button id="watchlist-btn" class="text-sm bg-orange-600 hover:bg-orange-700 rounded-full px-4 py-2 transition-colors">
+                    Watchlist <span id="watchlist-count">(0)</span>
+                </button>
+                <form id="form" class="w-full max-w-xs sm:max-w-sm hidden md:block">
+                    <div class="relative">
+                         <span class="absolute inset-y-0 left-0 flex items-center pl-3"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span>
+                        <input type="text" id="search" class="w-full bg-gray-900 border-2 border-gray-700 focus:border-orange-600 focus:ring-0 text-orange-100 rounded-full py-2 pl-10 pr-4 transition-colors duration-300 placeholder-gray-500" placeholder="Search...">
+                    </div>
+                </form>
+            </div>
+        </div>
+         <form id="mobile-search-form" class="md:hidden hidden mt-4">
+            <input type="text" id="mobile-search" class="w-full bg-gray-900 border-2 border-gray-700 focus:border-orange-600 focus:ring-0 text-orange-100 rounded-full py-2 px-4 transition-colors duration-300 placeholder-gray-500" placeholder="Search...">
+        </form>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <h2 id="grid-title" class="text-2xl font-bold text-orange-400 mb-4">Discover</h2>
+        <div id="main-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-8"></div>
+    </main>
+    
+    <div id="loader" class="hidden fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-[100]">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-orange-500"></div>
+    </div>
+    
+    <!-- Watchlist Modal -->
+    <div id="watchlist-modal" class="modal hidden fixed inset-0 bg-black/50 z-[60] flex justify-center items-center p-4">
+        <div class="modal-content rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] flex flex-col scale-95">
+            <div class="flex justify-between items-center p-4 border-b border-primary-light">
+                <h2 class="text-2xl font-bold text-orange-500">My Watchlist</h2>
+                <button id="close-watchlist-btn" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div id="watchlist-content" class="p-4 md:p-6 overflow-y-auto"></div>
+        </div>
+    </div>
+    
+    <!-- Details Modal -->
+    <div id="details-modal" class="modal hidden fixed inset-0 bg-black/50 z-[70] flex justify-center items-center p-4">
+        <div class="modal-content rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row scale-95 overflow-hidden">
+            <img id="details-poster" src="" alt="Poster" class="w-full md:w-1/3 h-64 md:h-auto object-cover">
+            <div class="flex flex-col p-6 overflow-y-auto flex-grow">
+                 <div class="flex justify-between items-start mb-4">
+                    <h2 id="details-title" class="text-3xl font-bold text-orange-500">Title</h2>
+                    <button id="close-details-btn" class="text-gray-400 hover:text-white text-4xl leading-none">&times;</button>
+                </div>
+                <div class="flex flex-col md:flex-row items-center gap-6 mb-4">
+                    <div id="details-watchability" class="flex-shrink-0"></div>
+                    <div id="details-ratings" class="grid grid-cols-2 gap-x-6 gap-y-2 text-center md:text-left"></div>
+                </div>
+                <h3 class="text-xl font-bold text-orange-400 mb-2 mt-2">Synopsis</h3>
+                <p id="details-overview" class="text-orange-200 mb-6">Synopsis text...</p>
+                <h3 class="text-xl font-bold text-orange-400 mb-2 mt-2">If you liked this...</h3>
+                <div id="details-recommendations" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+                <div class="flex items-center gap-2 mt-auto">
+                    <button id="details-watchlist-btn" class="w-full py-3 rounded-lg text-md font-semibold transition-colors">Add to Watchlist</button>
+                    <button id="details-watched-btn" class="flex-shrink-0 w-16 h-full flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors" title="Mark as Watched">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="fixed top-5 right-5 z-[80] space-y-2"></div>
+
+    <script>
+        // --- API Configuration ---
+        const API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
+        const ANIME_GENRE_ID = 16;
+        
+        // --- DOM Elements ---
+        const mainGrid = document.getElementById('main-grid');
+        const gridTitle = document.getElementById('grid-title');
+        const form = document.getElementById('form');
+        const search = document.getElementById('search');
+        const mobileSearchForm = document.getElementById('mobile-search-form');
+        const mobileSearch = document.getElementById('mobile-search');
+        const searchToggleBtn = document.getElementById('search-toggle-btn');
+        const loader = document.getElementById('loader');
+        const mainTitle = document.getElementById('main-title');
+        const mediaFilters = document.getElementById('media-filters');
+        
+        const watchlistBtn = document.getElementById('watchlist-btn');
+        const watchlistCountEl = document.getElementById('watchlist-count');
+        const watchlistModal = document.getElementById('watchlist-modal');
+        const watchlistContent = document.getElementById('watchlist-content');
+        const closeWatchlistBtn = document.getElementById('close-watchlist-btn');
+
+        const detailsModal = document.getElementById('details-modal');
+        const detailsTitle = document.getElementById('details-title');
+        const detailsPoster = document.getElementById('details-poster');
+        const detailsWatchability = document.getElementById('details-watchability');
+        const detailsRatings = document.getElementById('details-ratings');
+        const detailsOverview = document.getElementById('details-overview');
+        const detailsRecommendations = document.getElementById('details-recommendations');
+        const detailsWatchlistBtn = document.getElementById('details-watchlist-btn');
+        const detailsWatchedBtn = document.getElementById('details-watched-btn');
+        const closeDetailsBtn = document.getElementById('close-details-btn');
+        const glowToggleBtn = document.getElementById('glow-toggle-btn');
+        const glowIconOn = document.getElementById('glow-icon-on');
+        const glowIconOff = document.getElementById('glow-icon-off');
+        const glowCursor = document.getElementById('glow-cursor');
+
+        // --- State ---
+        let currentMediaType = 'movie';
+        let watchlist = [];
+        let watchedList = [];
+
+        // --- Helper Functions ---
+        const showLoader = () => loader.classList.remove('hidden');
+        const hideLoader = () => loader.classList.add('hidden');
+
+        const showModal = (modal) => {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => modal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        };
+
+        const hideModal = (modal) => {
+            modal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 300);
+        };
+
+        const showToast = (message, type = 'info') => {
+            const colors = { info: 'bg-blue-500', success: 'bg-green-500', error: 'bg-red-500' };
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast text-white px-6 py-3 rounded-lg shadow-lg ${colors[type]}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        };
+
+        const getSimulatedScores = (tmdbScore) => {
+            const score = tmdbScore / 10;
+            const imdb = (tmdbScore * 0.9 + Math.random() * 0.5).toFixed(1);
+            const rottenTomatoes = Math.round(Math.pow(score, 1.5) * 100);
+            const letterboxd = (tmdbScore / 2).toFixed(2);
+            return { imdb, rottenTomatoes, letterboxd };
+        };
+
+        const getWatchability = (imdb, rt, lb) => {
+            const imdbScore = parseFloat(imdb) * 10;
+            const rtScore = parseFloat(rt);
+            const lbScore = parseFloat(lb) * 20;
+            const watchability = Math.round((imdbScore * 0.35) + (rtScore * 0.45) + (lbScore * 0.20));
+            let label = "Maybe Skip";
+            let color = "text-red-500";
+            if (watchability >= 75) { label = "Must Watch!"; color = "text-green-400"; }
+            else if (watchability >= 50) { label = "Worth a Shot"; color = "text-yellow-400"; }
+            return { score: watchability, label, color };
+        };
+        
+        // --- API & Content Rendering ---
+        const renderContentGrid = (items) => {
+            mainGrid.innerHTML = '';
+            if (items.length === 0) { showError("No results found."); return; }
+            items.forEach((item, index) => {
+                if(!item.poster_path) return;
+                const isMovie = item.media_type === 'movie' || currentMediaType === 'movie';
+                const title = item.title || item.name;
+                const { imdb, rottenTomatoes, letterboxd } = getSimulatedScores(item.vote_average);
+                const imageUrl = IMG_PATH + item.poster_path;
+                const isWatchlisted = watchlist.some(w => w.id === item.id);
+                const isWatched = watchedList.includes(item.id);
+                const overviewText = item.overview ? item.overview.replace(/"/g, '&quot;').replace(/'/g, '&apos;') : "No overview available.";
+                const encodedTitle = title.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+                const { score: watchabilityScore, label: watchabilityLabel, color: watchabilityColor } = getWatchability(imdb, rottenTomatoes, letterboxd);
+
+                const itemEl = document.createElement('div');
+                itemEl.className = 'content-card flex-shrink-0';
+                itemEl.dataset.id = item.id;
+                itemEl.style.animation = `fade-in-up 0.5s ease-out ${index * 0.05}s forwards`;
+                itemEl.innerHTML = `
+                    <img src="${imageUrl}" alt="${title}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/500x750/1a1a1a/FFEDD5?text=Image+Not+Found';">
+                    <div class="watched-overlay ${isWatched ? '' : 'hidden'}"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></div>
+                    <div class="info-popup">
+                        <div class="info-content-wrapper h-full flex flex-col justify-end text-center">
+                             <div class="watchability-hover-score mb-4">
+                                <p class="text-4xl font-bold ${watchabilityColor}">${watchabilityScore}%</p>
+                                <p class="text-xs text-gray-400">Watchability</p>
+                            </div>
+                            <h3 class="title text-lg font-bold text-white mb-3 truncate">${title}</h3>
+                            <div class="controls flex items-center gap-2">
+                                <button class="popup-watchlist-btn w-full py-2 rounded-lg text-sm font-semibold transition-colors ${isWatchlisted ? 'bg-orange-700 cursor-default' : 'bg-orange-600 hover:bg-orange-500'}" 
+                                    data-id="${item.id}" data-title="${encodedTitle}" data-poster="${item.poster_path}" data-type="${isMovie ? 'movie' : 'tv'}">
+                                    ${isWatchlisted ? '✓ In Watchlist' : '+ Watchlist'}
+                                </button>
+                                <button class="details-btn flex-shrink-0 w-10 h-9 bg-gray-700 hover:bg-gray-600 rounded-lg text-lg font-bold transition-colors" 
+                                    data-id="${item.id}" data-title="${encodedTitle}" data-overview="${overviewText}" data-poster="${imageUrl}"
+                                    data-imdb="${imdb}" data-rt="${rottenTomatoes}" data-letterboxd="${letterboxd}"
+                                    data-watchability-score="${watchabilityScore}" data-watchability-label="${watchabilityLabel}" data-watchability-color="${watchabilityColor}"
+                                    data-type="${isMovie ? 'movie' : 'tv'}" data-poster-path="${item.poster_path}">i</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                mainGrid.appendChild(itemEl);
+            });
+        };
+
+        const showError = (message) => { mainGrid.innerHTML = `<div class="col-span-full text-center py-16"><h2 class="text-2xl text-orange-300">${message}</h2></div>`; };
+        
+        const updateWatchlistCount = () => { watchlistCountEl.textContent = `(${watchlist.length})`; };
+        
+        const saveUserData = () => {
+            localStorage.setItem('movieScoreWatchlist', JSON.stringify(watchlist));
+            localStorage.setItem('movieScoreWatchedList', JSON.stringify(watchedList));
+            updateWatchlistCount();
+        };
+        
+        const loadUserData = () => {
+            const storedWatchlist = localStorage.getItem('movieScoreWatchlist');
+            if (storedWatchlist) watchlist = JSON.parse(storedWatchlist);
+            const storedWatchedList = localStorage.getItem('movieScoreWatchedList');
+            if (storedWatchedList) watchedList = JSON.parse(storedWatchedList);
+            updateWatchlistCount();
+        };
+
+        const handleAddToWatchlist = (id, title, posterPath, type) => {
+            if (watchlist.some(item => item.id === id)) { showToast("Already in your watchlist.", 'info'); return false; }
+            const item = { id, title, poster_path: posterPath, type, subType: currentMediaType === 'anime' && type === 'tv' ? 'anime' : null };
+            watchlist.push(item);
+            saveUserData();
+            showToast("Added to watchlist!", 'success');
+            return true;
+        };
+        
+        const handleRemoveFromWatchlist = (idToRemove) => { 
+            watchlist = watchlist.filter(item => item.id !== idToRemove); 
+            saveUserData(); 
+            renderWatchlist(); 
+            updateButtonStates(idToRemove); 
+        };
+
+        const handleToggleWatched = (id) => {
+            if(watchedList.includes(id)) { 
+                watchedList = watchedList.filter(i => i !== id); 
+                showToast("Removed from Watched"); 
+            } else { 
+                watchedList.push(id); 
+                showToast("Marked as Watched!", "success"); 
+            }
+            saveUserData();
+            updateWatchedStatusUI(id);
+        };
+
+        const updateButtonStates = (id) => {
+            const isWatchlisted = watchlist.some(w => w.id === id); const isWatched = watchedList.includes(id);
+            document.querySelectorAll(`.popup-watchlist-btn[data-id="${id}"]`).forEach(btn => {
+                btn.innerHTML = isWatchlisted ? '✓ In Watchlist' : '+ Watchlist';
+                btn.classList.toggle('bg-orange-700', isWatchlisted); btn.classList.toggle('cursor-default', isWatchlisted);
+                btn.classList.toggle('bg-orange-600', !isWatchlisted); btn.classList.toggle('hover:bg-orange-500', !isWatchlisted);
+            });
+            if (!detailsModal.classList.contains('hidden') && parseInt(detailsWatchlistBtn.dataset.id) === id) {
+                 detailsWatchlistBtn.innerHTML = isWatchlisted ? '✓ In Watchlist' : '+ Watchlist';
+                 detailsWatchlistBtn.classList.toggle('bg-orange-700', isWatchlisted); detailsWatchlistBtn.classList.toggle('cursor-default', isWatchlisted);
+                 detailsWatchlistBtn.classList.toggle('bg-orange-600', !isWatchlisted); detailsWatchlistBtn.classList.toggle('hover:bg-orange-500', !isWatchlisted);
+                 detailsWatchedBtn.classList.toggle('bg-green-600', isWatched);
+            }
+        }
+        
+        const updateWatchedStatusUI = (id) => {
+            const isWatched = watchedList.includes(id);
+            document.querySelectorAll(`.content-card[data-id="${id}"]`).forEach(card => card.querySelector('.watched-overlay').classList.toggle('hidden', !isWatched));
+            const watchlistItem = document.querySelector(`.watchlist-item[data-id="${id}"]`);
+            if (watchlistItem) watchlistItem.querySelector('.watched-indicator').classList.toggle('hidden', !isWatched);
+            updateButtonStates(id);
+        }
+
+        const renderWatchlist = () => {
+            if (watchlist.length === 0) { watchlistContent.innerHTML = `<p class="text-center text-gray-400 py-8">Your watchlist is empty. Add some titles!</p>`; return; }
+            const createSectionHTML = (title, items) => {
+                if (items.length === 0) return '';
+                return `<div class="mb-6"><h3 class="text-xl font-bold text-orange-400 border-b border-primary-light pb-2 mb-4">${title} (${items.length})</h3><div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">${items.map(item => { const imageUrl = item.poster_path !== 'null' ? IMG_PATH + item.poster_path : `https://placehold.co/500x750/1a1a1a/FFEDD5?text=${encodeURIComponent(item.title)}`; const isWatched = watchedList.includes(item.id);
+                        return `<div class="relative group rounded-md overflow-hidden watchlist-item" data-id="${item.id}"><img src="${imageUrl}" class="aspect-[2/3] object-cover w-full"><div class="absolute inset-0 bg-black/70 flex p-2 justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"><button class="remove-watchlist-btn text-white bg-red-600 hover:bg-red-700 rounded-full h-10 w-10 flex justify-center items-center transition-transform transform group-hover:scale-100 scale-75" data-id="${item.id}" title="Remove"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div><div class="watched-indicator ${isWatched ? '' : 'hidden'}"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div></div>`;}).join('')}</div></div>`;};
+            const movies = watchlist.filter(item => item.type === 'movie'); const animes = watchlist.filter(item => item.subType === 'anime');
+            const tvShows = watchlist.filter(item => item.type === 'tv' && item.subType !== 'anime');
+            watchlistContent.innerHTML = createSectionHTML('Movies', movies) + createSectionHTML('TV Shows', tvShows) + createSectionHTML('Anime', animes);
+        };
+        
+        const fetchAndRenderRecommendations = async (id, type) => {
+            const url = `${BASE_URL}/${type}/${id}/recommendations?api_key=${API_KEY}`;
+            detailsRecommendations.innerHTML = '<p class="col-span-full text-center text-gray-400">Loading recommendations...</p>';
+            try {
+                const res = await fetch(url); const data = await res.json();
+                if(data.results && data.results.length > 0) {
+                    detailsRecommendations.innerHTML = data.results.slice(0, 4).map(item => { const imageUrl = item.poster_path ? IMG_PATH + item.poster_path : `https://placehold.co/500x750/1a1a1a/FFEDD5?text=No+Image`;
+                         return `<div class="recommendation-card cursor-pointer" data-id="${item.id}" data-type="${type}"><img src="${imageUrl}" alt="${item.title || item.name}" class="aspect-[2/3] object-cover w-full rounded-md hover:opacity-75"></div>`;}).join('');
+                } else { detailsRecommendations.innerHTML = '<p class="col-span-full text-center text-gray-400">No recommendations found.</p>'; }
+            } catch (err) { detailsRecommendations.innerHTML = '<p class="col-span-full text-center text-gray-400">Could not load recommendations.</p>'; }
+        }
+        
+        const performSearch = async (searchTerm) => {
+            showLoader(); let url;
+            if (searchTerm) {
+                gridTitle.textContent = `Search Results for "${searchTerm}"`;
+                url = `${BASE_URL}/search/${currentMediaType === 'anime' ? 'tv' : currentMediaType}?api_key=${API_KEY}&query=${searchTerm}`;
+                if (currentMediaType === 'anime') url += `&with_genres=${ANIME_GENRE_ID}`;
+            } else {
+                const titleMap = { movie: 'Discover Movies', tv: 'Discover TV Shows', anime: 'Discover Anime' };
+                gridTitle.textContent = titleMap[currentMediaType];
+                url = `${BASE_URL}/discover/${currentMediaType === 'anime' ? 'tv' : currentMediaType}?api_key=${API_KEY}&sort_by=popularity.desc`;
+                if (currentMediaType === 'anime') url += `&with_genres=${ANIME_GENRE_ID}`;
+            }
+            try { const res = await fetch(url); const data = await res.json(); renderContentGrid(data.results); }
+            catch (error) { console.error("Failed to fetch content:", error); showError("Could not fetch content. Please try again."); }
+            finally { hideLoader(); }
+        }
+
+        // --- Event Listeners ---
+        form.addEventListener('submit', (e) => { e.preventDefault(); performSearch(search.value.trim()); search.value = ''; });
+        mobileSearchForm.addEventListener('submit', (e) => { e.preventDefault(); performSearch(mobileSearch.value.trim()); mobileSearch.value = ''; mobileSearchForm.classList.add('hidden'); });
+        searchToggleBtn.addEventListener('click', () => { mobileSearchForm.classList.toggle('hidden'); if (!mobileSearchForm.classList.contains('hidden')) mobileSearch.focus(); });
+        
+        mediaFilters.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentMediaType = e.target.dataset.type;
+                performSearch();
+            }
+        });
+        
+        mainGrid.addEventListener('click', e => {
+            const watchlistBtn = e.target.closest('.popup-watchlist-btn');
+            if (watchlistBtn) { 
+                const id = parseInt(watchlistBtn.dataset.id);
+                if (handleAddToWatchlist(id, watchlistBtn.dataset.title, watchlistBtn.dataset.poster, watchlistBtn.dataset.type)) { updateButtonStates(id); }
+                return; 
+            }
+            
+            const detailsBtn = e.target.closest('.details-btn');
+            if (detailsBtn) {
+                const { id, title, overview, poster, imdb, rt, letterboxd, watchabilityScore, watchabilityLabel, watchabilityColor, type, posterPath } = detailsBtn.dataset;
+                detailsTitle.innerHTML = title; detailsPoster.src = poster; detailsOverview.innerHTML = overview;
+                const radius = 45; const circumference = 2 * Math.PI * radius; const offset = circumference - (watchabilityScore / 100) * circumference;
+                detailsWatchability.innerHTML = `<div class="watchability-score-container"><svg class="w-full h-full" viewBox="0 0 100 100"><circle class="watchability-score-bg" cx="50" cy="50" r="${radius}"></circle><circle class="watchability-score-progress ${watchabilityColor.replace('text-','stroke-')}" cx="50" cy="50" r="${radius}" style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference};" data-offset="${offset}"></circle></svg><div class="watchability-score-text"><span class="text-3xl font-bold">${watchabilityScore}%</span><span class="text-xs font-semibold ${watchabilityColor}">${watchabilityLabel}</span></div></div>`;
+                setTimeout(() => { const p = detailsWatchability.querySelector('.watchability-score-progress'); p.style.strokeDashoffset = p.dataset.offset;}, 100);
+                detailsRatings.innerHTML = `<div><span class="text-sm text-gray-400">IMDb</span><p class="font-bold text-xl">${imdb}</p></div><div><span class="text-sm text-gray-400">Rotten</span><p class="font-bold text-xl">${rt}%</p></div><div><span class="text-sm text-gray-400">Letterboxd</span><p class="font-bold text-xl">${letterboxd}</p></div>`;
+                detailsWatchlistBtn.dataset.id = id; detailsWatchlistBtn.dataset.title = title; detailsWatchlistBtn.dataset.poster = posterPath; detailsWatchlistBtn.dataset.type = type;
+                detailsWatchedBtn.dataset.id = id;
+                updateButtonStates(parseInt(id));
+                fetchAndRenderRecommendations(id, type);
+                showModal(detailsModal);
+            }
+        });
+
+        detailsWatchlistBtn.addEventListener('click', (e) => {
+            const btn = e.currentTarget; const id = parseInt(btn.dataset.id);
+            if (handleAddToWatchlist(id, btn.dataset.title, btn.dataset.poster, btn.dataset.type)){ updateButtonStates(id); }
+        });
+        
+        detailsWatchedBtn.addEventListener('click', (e) => {
+            handleToggleWatched(parseInt(e.currentTarget.dataset.id));
+        });
+
+        detailsRecommendations.addEventListener('click', async (e) => {
+            const card = e.target.closest('.recommendation-card');
+            if (card) {
+                const { id, type } = card.dataset;
+                const res = await fetch(`${BASE_URL}/${type}/${id}?api_key=${API_KEY}`);
+                const item = await res.json();
+                const { imdb, rottenTomatoes, letterboxd } = getSimulatedScores(item.vote_average);
+                const { score, label, color } = getWatchability(imdb, rottenTomatoes, letterboxd);
+                detailsTitle.innerHTML = item.title || item.name; detailsPoster.src = IMG_PATH + item.poster_path;
+                detailsOverview.innerHTML = item.overview || "No overview available.";
+                const radius = 45; const circumference = 2 * Math.PI * radius; const offset = circumference - (score / 100) * circumference;
+                detailsWatchability.innerHTML = `<div class="watchability-score-container"><svg class="w-full h-full" viewBox="0 0 100 100"><circle class="watchability-score-bg" cx="50" cy="50" r="${radius}"></circle><circle class="watchability-score-progress ${color.replace('text-','stroke-')}" cx="50" cy="50" r="${radius}" style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference};" data-offset="${offset}"></circle></svg><div class="watchability-score-text"><span class="text-3xl font-bold">${score}%</span><span class="text-xs font-semibold ${color}">${label}</span></div></div>`;
+                setTimeout(() => { const p = detailsWatchability.querySelector('.watchability-score-progress'); p.style.strokeDashoffset = p.dataset.offset;}, 100);
+                detailsRatings.innerHTML = `<div><span class="text-sm text-gray-400">IMDb</span><p class="font-bold text-xl">${imdb}</p></div><div><span class="text-sm text-gray-400">Rotten</span><p class="font-bold text-xl">${rottenTomatoes}%</p></div><div><span class="text-sm text-gray-400">Letterboxd</span><p class="font-bold text-xl">${letterboxd}</p></div>`;
+                detailsWatchlistBtn.dataset.id = item.id; detailsWatchlistBtn.dataset.title = item.title || item.name; detailsWatchlistBtn.dataset.poster = item.poster_path; detailsWatchlistBtn.dataset.type = type;
+                detailsWatchedBtn.dataset.id = item.id;
+                updateButtonStates(item.id); fetchAndRenderRecommendations(item.id, type);
+            }
+        });
+
+        watchlistBtn.addEventListener('click', () => { renderWatchlist(); showModal(watchlistModal); });
+        closeWatchlistBtn.addEventListener('click', () => hideModal(watchlistModal));
+        watchlistModal.addEventListener('click', (e) => { if (e.target === watchlistModal) hideModal(watchlistModal); });
+
+        closeDetailsBtn.addEventListener('click', () => hideModal(detailsModal));
+        detailsModal.addEventListener('click', (e) => { if (e.target === detailsModal) hideModal(detailsModal); });
+
+        watchlistContent.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-watchlist-btn')) { handleRemoveFromWatchlist(parseInt(e.target.closest('.remove-watchlist-btn').dataset.id)); }
+        });
+
+        mainTitle.addEventListener('mouseenter', () => mainTitle.classList.add('animated-gradient-text'));
+        mainTitle.addEventListener('mouseleave', () => mainTitle.classList.remove('animated-gradient-text'));
+        
+        // --- Glow Cursor Logic ---
+        document.addEventListener('mousemove', e => {
+            if (document.body.classList.contains('glow-effect-active')) {
+                const { clientX, clientY } = e;
+                document.body.style.setProperty('--mouse-x', `${clientX}px`);
+                document.body.style.setProperty('--mouse-y', `${clientY}px`);
+                glowCursor.style.left = `${clientX}px`;
+                glowCursor.style.top = `${clientY}px`;
+            }
+        });
+        
+        let isGlowActive = localStorage.getItem('glowEffectActive') === 'true';
+
+        function setGlowState(isActive) {
+            document.body.classList.toggle('glow-effect-active', isActive);
+            glowIconOn.classList.toggle('hidden', !isActive);
+            glowIconOff.classList.toggle('hidden', isActive);
+            localStorage.setItem('glowEffectActive', isActive);
+            if (!isActive) {
+                 document.body.style.setProperty('--mouse-x', `-1000px`);
+                 document.body.style.setProperty('--mouse-y', `-1000px`);
+            }
+        }
+
+        glowToggleBtn.addEventListener('click', () => {
+            isGlowActive = !isGlowActive;
+            setGlowState(isGlowActive);
+        });
+
+
+        // --- Initial Load ---
+        const initializeMainApp = () => {
+            loadUserData();
+            performSearch();
+            setGlowState(isGlowActive);
+        };
+        
+        initializeMainApp();
+    </script>
+</body>
+</html>
+
